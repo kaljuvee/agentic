@@ -1,0 +1,8 @@
+flowchart TD
+    A[User Input] --> B[Agent/Model]
+    B --> C{Needs Tools?}
+    C -->|Yes| D[Execute Tools]
+    D --> B
+    C -->|No| E[Return Response]
+    E --> F[Save State]
+    F --> G[End]
