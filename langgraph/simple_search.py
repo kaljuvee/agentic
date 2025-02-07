@@ -22,16 +22,39 @@ def web_search(query: str) -> str:
 def convert_temperature(temp_str: str, to_unit: str) -> str:
     """Convert temperature between Fahrenheit and Celsius."""
     try:
-        # Extract number from string like "72°F"
-        temp = float(temp_str.split('°')[0])
-        if to_unit.upper() == "C" and "°F" in temp_str:
-            return f"{(temp - 32) * 5/9:.1f}°C"
-        elif to_unit.upper() == "F" and "°C" in temp_str:
-            return f"{(temp * 9/5) + 32:.1f}°F"
+        # Clean up the input string - remove spaces and handle various formats
+        temp_str = temp_str.strip().upper().replace(" ", "")
+        
+        # Extract number using more flexible parsing
+        import re
+        number_match = re.search(r'(-?\d+\.?\d*)', temp_str)
+        if not number_match:
+            return "Could not find temperature value"
+        
+        temp = float(number_match.group(1))
+        
+        # Determine input unit
+        if any(f in temp_str for f in ['F', '°F']):
+            input_unit = 'F'
+        elif any(c in temp_str for c in ['C', '°C']):
+            input_unit = 'C'
+        else:
+            return "Could not determine temperature unit"
+        
+        # Convert based on input and target units
+        to_unit = to_unit.strip().upper()
+        if input_unit == 'F' and to_unit.startswith('C'):
+            result = (temp - 32) * 5/9
+            return f"{result:.1f}°C"
+        elif input_unit == 'C' and to_unit.startswith('F'):
+            result = (temp * 9/5) + 32
+            return f"{result:.1f}°F"
+        elif input_unit == to_unit:
+            return f"{temp:.1f}°{input_unit}"
         else:
             return "Invalid conversion request"
-    except:
-        return "Invalid temperature format"
+    except Exception as e:
+        return f"Error converting temperature: {str(e)}"
 
 # Initialize tools
 tools = [web_search, convert_temperature]
@@ -79,6 +102,9 @@ workflow.add_conditional_edges(
     }
 )
 workflow.add_edge("tools", "agent")
+
+# Save graph visualization
+#workflow.get_graph().draw_mermaid_png("graph.png")
 
 # Initialize memory
 checkpointer = MemorySaver()
