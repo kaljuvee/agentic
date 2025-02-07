@@ -5,3 +5,7 @@ langchain-anthropic
 autogen-agentchat~=0.2
 matplotlib
 numpy
+langchain
+duckduckgo-search
+langchain-google-genai
+langchain_community
