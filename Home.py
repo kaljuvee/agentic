@@ -15,13 +15,22 @@ if "messages" not in st.session_state:
 if "selected_endpoint" not in st.session_state:
     st.session_state.selected_endpoint = "Production"
 
+def normalize_agent_name(agent_name: str) -> str:
+    """
+    Normalize agent name to lowercase and replace spaces with hyphens
+    """
+    return agent_name.lower().replace(" ", "-")
+
 def send_message(message: str, endpoint_url: str) -> Dict[Any, Any]:
     """
     Send message to the selected API endpoint
     """
+    # Normalize the agent name before sending
+    normalized_agent = normalize_agent_name(st.session_state.agent_selector)
+    
     payload = {
         "query": message,
-        "agent": "anchorman"  # Currently hardcoded to anchorman agent
+        "agent": normalized_agent
     }
     
     try:
@@ -42,6 +51,22 @@ with st.sidebar:
         "Local": "http://localhost:5000"
     }
     
+    # Add agent selector
+    agents = [
+        "Anchorman",
+        "Sevro",
+        "Sous-Chef",
+        "BonVoyage",
+        "JRR Token",
+        "ChessBuddy",
+    ]
+    
+    selected_agent = st.selectbox(
+        "Select Agent",
+        options=agents,
+        key="agent_selector"
+    )
+    
     selected_endpoint = st.radio(
         "Select API Endpoint",
         options=list(endpoints.keys()),
@@ -51,12 +76,12 @@ with st.sidebar:
     # Display current endpoint URL
     st.code(endpoints[selected_endpoint], language="text")
     
-    # Add some information about the agent
+    # Add some information about the agents
     st.markdown("---")
     st.markdown("### About")
     st.markdown("""
-    Currently using the Anchorman agent.
-    This agent provides news updates in the style of Ron Burgundy.
+    Learn more about the available agents and their capabilities in the 
+    [Agent Catalogue Documentation](https://github.com/ZuvuFoundation/agent-catalogue/blob/main/documentation/agent_ideas.md)
     """)
 
 # Main chat interface
