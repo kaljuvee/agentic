@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 # Configure the page
 st.set_page_config(
-    page_title="AI Agents Chat Interface",
+    page_title="Zuvu AI Agents API Tester",
     page_icon="🤖",
     layout="wide"
 )
