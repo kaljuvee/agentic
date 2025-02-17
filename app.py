@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 import importlib
 import os
+import json
 
 app = Flask(__name__)
 
@@ -46,6 +47,23 @@ def chat():
         return jsonify({"error": f"Agent '{agent}' not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Change the /swagger route to serve the UI instead of raw JSON
+@app.route('/swagger')
+def swagger():
+    """
+    Serve the Swagger UI interface
+    """
+    return render_template('swagger_ui.html')
+
+# Add new route for the raw JSON
+@app.route('/swagger.json')
+def swagger_json():
+    """
+    Serve the Swagger JSON file
+    """
+    with open('static/swagger.json') as f:
+        return jsonify(json.load(f))
 
 if __name__ == '__main__':
     app.run(debug=True)
