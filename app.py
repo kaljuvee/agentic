@@ -22,7 +22,7 @@ def init_twitter_auth():
         client_id=TWITTER_CLIENT_ID,
         client_secret=TWITTER_CLIENT_SECRET,
         redirect_uri=CALLBACK_URL,
-        scope=["tweet.read", "tweet.write", "users.read"]
+        scope=["tweet.read", "tweet.write", "users.read", "offline.access"]
     )
     return oauth2_user_handler
 
