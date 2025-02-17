@@ -15,5 +15,6 @@ flask-cors
 flask-restful
 flask-limiter
 flask-sqlalchemy
-streamlit
+streamlit>=1.24.0
 gunicorn==21.2.0
+requests>=2.31.0

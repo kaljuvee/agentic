@@ -3,7 +3,8 @@ import json
 
 def test_swagger_endpoints():
     """Test that Swagger documentation is accessible and valid"""
-    base_url = "http://localhost:5000"
+    #base_url = "http://localhost:5000"
+    base_url = "https://agentic-dcjz.onrender.com"
     
     # Test Swagger endpoint
     swagger_response = requests.get(f"{base_url}/swagger")
