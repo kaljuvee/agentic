@@ -1,9 +1,30 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, session
 import importlib
 import os
 import json
+import tweepy
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)  # For session management
+
+# Twitter API credentials
+TWITTER_CLIENT_ID = os.getenv("TWITTER_CLIENT_ID")
+TWITTER_CLIENT_SECRET = os.getenv("TWITTER_CLIENT_SECRET")
+CALLBACK_URL = "https://agentic-dcjz.onrender.com/callback"
+
+def init_twitter_auth():
+    """Initialize Twitter OAuth 2.0 handler"""
+    oauth2_user_handler = tweepy.OAuth2UserHandler(
+        client_id=TWITTER_CLIENT_ID,
+        client_secret=TWITTER_CLIENT_SECRET,
+        redirect_uri=CALLBACK_URL,
+        scope=["tweet.read", "tweet.write", "users.read"]
+    )
+    return oauth2_user_handler
 
 @app.route('/')
 def index():
@@ -11,6 +32,60 @@ def index():
     Serve the welcome page with the chat test interface
     """
     return render_template('index.html')
+
+@app.route('/twitter-auth')
+def twitter_auth():
+    """
+    Handle Twitter authentication initiation
+    """
+    try:
+        # Initialize OAuth handler
+        auth = init_twitter_auth()
+        
+        # Get authorization URL
+        redirect_url = auth.get_authorization_url()
+        
+        # Store state in session
+        session['oauth_state'] = auth.state
+        
+        # Redirect to Twitter
+        return redirect(redirect_url)
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/callback')
+def callback():
+    """
+    Handle Twitter OAuth callback
+    """
+    try:
+        # Get the authorization code
+        code = request.args.get('code')
+        state = request.args.get('state')
+        
+        # Verify state
+        if state != session.get('oauth_state'):
+            return jsonify({"error": "Invalid state parameter"}), 400
+        
+        # Initialize auth handler
+        auth = init_twitter_auth()
+        
+        # Get access token
+        access_token = auth.fetch_token(code)
+        
+        # Store token in session
+        session['access_token'] = access_token
+        
+        # Redirect to success page
+        return render_template('callback.html', 
+                             success=True, 
+                             access_token=access_token)
+        
+    except Exception as e:
+        return render_template('callback.html', 
+                             success=False, 
+                             error=str(e))
 
 @app.route('/chat', methods=['POST'])
 def chat():

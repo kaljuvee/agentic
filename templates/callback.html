@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Authentication Result</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+            {% if success %}
+                <div class="text-center">
+                    <h1 class="text-2xl font-bold text-green-600 mb-4">
+                        🎉 Successfully Authenticated with Twitter!
+                    </h1>
+                    
+                    <div class="bg-gray-50 p-4 rounded-md mb-4">
+                        <h2 class="text-lg font-semibold mb-2">Your Access Token:</h2>
+                        <pre class="text-sm overflow-auto max-h-40 bg-gray-100 p-2 rounded">{{ access_token }}</pre>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <button onclick="testConnection()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            Test Connection
+                        </button>
+                        
+                        <button onclick="testTweet()" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                            Post Test Tweet
+                        </button>
+                    </div>
+                    
+                    <div id="testResult" class="mt-4 p-4 rounded-md hidden"></div>
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <h1 class="text-2xl font-bold text-red-600 mb-4">
+                        ❌ Authentication Failed
+                    </h1>
+                    <p class="text-gray-700 mb-4">{{ error }}</p>
+                    <a href="/twitter-auth" class="text-blue-500 hover:text-blue-600 underline">
+                        Try Again
+                    </a>
+                </div>
+            {% endif %}
+            
+            <div class="text-center mt-8">
+                <a href="/" class="text-blue-500 hover:text-blue-600 underline">
+                    Return to Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.className = 'mt-4 p-4 rounded-md';
+            resultDiv.textContent = 'Testing connection...';
+            resultDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch('/test-connection');
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'mt-4 p-4 rounded-md bg-green-100 text-green-700';
+                    resultDiv.textContent = `Connected as @${data.username}`;
+                } else {
+                    resultDiv.className = 'mt-4 p-4 rounded-md bg-red-100 text-red-700';
+                    resultDiv.textContent = data.error;
+                }
+            } catch (error) {
+                resultDiv.className = 'mt-4 p-4 rounded-md bg-red-100 text-red-700';
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function testTweet() {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.className = 'mt-4 p-4 rounded-md';
+            resultDiv.textContent = 'Posting tweet...';
+            resultDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch('/test-tweet');
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'mt-4 p-4 rounded-md bg-green-100 text-green-700';
+                    resultDiv.innerHTML = `Tweet posted successfully! <a href="${data.tweet_url}" target="_blank" class="underline">View Tweet</a>`;
+                } else {
+                    resultDiv.className = 'mt-4 p-4 rounded-md bg-red-100 text-red-700';
+                    resultDiv.textContent = data.error;
+                }
+            } catch (error) {
+                resultDiv.className = 'mt-4 p-4 rounded-md bg-red-100 text-red-700';
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html> 
