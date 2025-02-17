@@ -60,7 +60,7 @@ with st.sidebar:
     """)
 
 # Main chat interface
-st.title("🤖 AI Agents Chat Interface")
+st.title("🤖 Zuvu AI Agents API Tester")
 
 # Display chat messages
 for message in st.session_state.messages:
