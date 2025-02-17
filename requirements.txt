@@ -18,3 +18,4 @@ flask-sqlalchemy
 streamlit>=1.24.0
 gunicorn==21.2.0
 requests>=2.31.0
+tweepy

@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 from langchain_anthropic import ChatAnthropic
 from langchain_core.tools import tool
 from langgraph.checkpoint.memory import MemorySaver
@@ -8,7 +8,9 @@ from dotenv import load_dotenv
 import os
 import requests
 from datetime import datetime
+import tweepy
 
+#https://github.com/langchain-ai/langgraph/blob/main/docs/docs/concepts/low_level.md
 # Load environment variables
 load_dotenv()
 
@@ -59,14 +61,53 @@ def get_news_headlines(category: str = None, query: str = None) -> str:
     except Exception as e:
         return f"Error fetching news: {str(e)}"
 
+@tool
+def post_to_twitter(message: str) -> str:
+    """
+    Post a message to Twitter.
+    Parameters:
+        message: The message to post (max 280 characters)
+    Returns: Status of the post
+    """
+    try:
+        # Initialize Twitter client
+        auth = tweepy.OAuthHandler(
+            os.getenv("TWITTER_API_KEY"),
+            os.getenv("TWITTER_API_SECRET")
+        )
+        auth.set_access_token(
+            os.getenv("TWITTER_ACCESS_TOKEN"),
+            os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
+        )
+        twitter_client = tweepy.Client(
+            consumer_key=os.getenv("TWITTER_API_KEY"),
+            consumer_secret=os.getenv("TWITTER_API_SECRET"),
+            access_token=os.getenv("TWITTER_ACCESS_TOKEN"),
+            access_token_secret=os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
+        )
+        
+        # Post tweet
+        response = twitter_client.create_tweet(text=message)
+        return f"Successfully posted to Twitter! Tweet ID: {response.data['id']}"
+    
+    except Exception as e:
+        return f"Error posting to Twitter: {str(e)}"
+
 # Initialize tools
-tools = [get_news_headlines]
+tools = [get_news_headlines, post_to_twitter]
 
 # Initialize the model with a specific prompt
 system_prompt = """You are Ron Burgundy, a charismatic news anchor. Your task is to present news headlines 
 in an engaging and professional manner, while maintaining your signature style. When users ask for news, 
-use the get_news_headlines tool to fetch relevant information. Always introduce the news with your 
-signature catchphrase 'I'm Ron Burgundy, and this is the news!' and end with 'Stay classy, San Diego!'
+use the get_news_headlines tool to fetch relevant information and optionally post to Twitter.
+
+Always introduce the news with your signature catchphrase 'I'm Ron Burgundy, and this is the news!' 
+and end with 'Stay classy, San Diego!'
+
+When asked to post to Twitter:
+1. Create a brief, engaging summary of the news (max 280 characters)
+2. Use your Ron Burgundy style but keep it professional
+3. Use the post_to_twitter tool to share the summary
 
 Remember to:
 1. Use the appropriate tool to fetch news based on the user's request
@@ -123,17 +164,25 @@ checkpointer = MemorySaver()
 # Compile the graph
 app = workflow.compile(checkpointer=checkpointer)
 
-def get_response(question: str, thread_id: str = "news_demo") -> dict:
+def get_response(
+    question: str, 
+    thread_id: str = "news_demo",
+    post_to_twitter: bool = False
+) -> dict:
     """
-    Get a response from the news agent for a given question.
+    Get a response from the news agent for a given question and optionally post to Twitter.
     
     Args:
         question (str): The user's question about news
         thread_id (str): Thread identifier for the conversation
+        post_to_twitter (bool): Whether to post the news summary to Twitter
         
     Returns:
         dict: The final state containing the conversation
     """
+    if post_to_twitter:
+        question = f"{question} Please also create a brief summary and post it to Twitter."
+        
     initial_message = {
         "messages": [{
             "role": "user",
@@ -149,7 +198,7 @@ def get_response(question: str, thread_id: str = "news_demo") -> dict:
 if __name__ == "__main__":
     # Test the agent directly
     question = "What are the top business headlines today?"
-    final_state = get_response(question)
+    final_state = get_response(question, post_to_twitter=True)
     
     # Print the conversation
     for message in final_state["messages"]:
