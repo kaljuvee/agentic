@@ -8,7 +8,7 @@ TEST_QUERIES = [
         "thread_id": "test_paper_account_info",
     },
     {
-        "query": "Place a market order to buy 1 share of MSFT",
+        "query": "Place a market order to buy 1 share of NVDA",
         "thread_id": "test_paper_market_order",
     },
     {
