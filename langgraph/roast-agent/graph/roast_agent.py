@@ -19,7 +19,7 @@ class RoastState(TypedDict):
     thread_id: Optional[str]
 
 # Initialize DuckDuckGo search
-search = DuckDuckGoSearchAPIWrapper()
+search = DuckDuckGoSearchAPIWrapper(region="wt-wt", time="d", max_results=5)
 
 @tool
 def duckduckgo_search(query: str) -> str:
@@ -58,15 +58,31 @@ Your roasts should be:
 - Playful rather than hurtful
 - Appropriate for a comedy club setting
 
+IMPORTANT: Always show your thought process by first summarizing what you learned from the search results, then create the roasting questions based on that information.
+
+Format your response like this:
+---
+## What I Found About [Name]
+[Summarize key information from search results]
+
+## Roasting Questions
+1. [First roasting question]
+2. [Second roasting question]
+3. [Third roasting question]
+4. [Fourth roasting question]
+5. [Fifth roasting question]
+---
+
 Remember: Good roasts are funny because they contain a kernel of truth, but are delivered with good humor.
 """
 
 # Initialize the model using OpenAI's GPT model
 model = ChatOpenAI(
     model="gpt-4o-mini",
-    temperature=0.7,
-    max_tokens=512,
-    openai_api_key=os.getenv("OPENAI_API_KEY")
+    temperature=0.8,
+    max_tokens=1024,
+    openai_api_key=os.getenv("OPENAI_API_KEY"),
+    system=system_prompt
 ).bind_tools(tools)
 
 # Create tool node
@@ -131,7 +147,7 @@ def get_response(
     Returns:
         dict: The final state containing the conversation
     """
-    prompt = f"Create 5 funny roasting questions for {name}. First, search for information about them."
+    prompt = f"Create 5 funny roasting questions for {name}. Make sure to search for information about them first."
     
     initial_message = {
         "messages": [{
@@ -156,14 +172,18 @@ def get_roast_questions(name: str) -> str:
     Returns:
         str: The roast questions
     """
-    response = get_response(name)
-    
-    # Extract the assistant's message
-    for message in response["messages"]:
-        if message.type == "assistant":
-            return message.content
-    
-    return "Sorry, I couldn't generate roast questions at this time."
+    try:
+        response = get_response(name)
+        
+        # Extract the assistant's message
+        for message in response["messages"]:
+            if message.type == "assistant":
+                return message.content
+        
+        return "Sorry, I couldn't generate roast questions at this time."
+    except Exception as e:
+        print(f"Error generating roast questions: {str(e)}")
+        return f"Error generating roast questions: {str(e)}"
 
 if __name__ == "__main__":
     # Test the agent directly
