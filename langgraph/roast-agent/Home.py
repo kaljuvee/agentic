@@ -22,18 +22,22 @@ if st.button("Generate Roast Questions", type="primary"):
         with st.spinner(f"Searching for info about {name} and crafting roasts..."):
             # Call the roast agent
             start_time = time.time()
-            roast_questions = get_roast_questions(name)
+            roast_response = get_roast_questions(name)
             end_time = time.time()
             
-            # Display the roasting questions
-            st.subheader(f"Roasting Questions for {name}:")
-            st.markdown(roast_questions)
-            
-            # Show timing info
-            st.caption(f"Generated in {end_time - start_time:.2f} seconds")
-            
-            # Add a fun element
-            st.balloons()
+            # Check if there was an error
+            if roast_response.startswith("Error generating roast questions:"):
+                st.error(roast_response)
+            else:
+                # Display the roasting questions
+                st.subheader(f"Roast Results for {name}:")
+                st.markdown(roast_response)
+                
+                # Show timing info
+                st.caption(f"Generated in {end_time - start_time:.2f} seconds")
+                
+                # Add a fun element
+                st.balloons()
     else:
         st.error("Please enter a name to generate roasting questions.")
 
@@ -41,8 +45,9 @@ st.markdown("---")
 st.markdown("""
 ### How it works
 1. The app searches for information about the person using DuckDuckGo
-2. Based on the search results, it creates 5 hilarious roasting questions
-3. The questions are meant to be funny but not overly mean or inappropriate
+2. The AI analyzes the search results and identifies interesting facts
+3. Based on this information, it creates 5 hilarious roasting questions
+4. The questions are meant to be funny but not overly mean or inappropriate
 
 ### Tips
 - Try celebrities, politicians, athletes, or other public figures
@@ -52,4 +57,4 @@ st.markdown("""
 
 # Footer
 st.markdown("---")
-st.markdown("Built with ❤️ using LangGraph and OpenRouter")
+st.markdown("Built with ❤️ using LangGraph and OpenAI")

@@ -1,6 +1,7 @@
 from typing import Literal, Optional, TypedDict, Annotated
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
+from langchain_core.messages import SystemMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph, MessagesState
 from langgraph.prebuilt import ToolNode
@@ -41,7 +42,7 @@ def duckduckgo_search(query: str) -> str:
 # Initialize tools
 tools = [duckduckgo_search]
 
-# Initialize the model with a specific prompt
+# System prompt
 system_prompt = """You are a comedy roast agent with a sharp wit and hilarious sense of humor. 
 Your job is to create personalized roasting questions about people.
 
@@ -76,13 +77,15 @@ Format your response like this:
 Remember: Good roasts are funny because they contain a kernel of truth, but are delivered with good humor.
 """
 
-# Initialize the model using OpenAI's GPT model
+# Get model name from environment or use default
+model_name = os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini")
+
+# Initialize the model
 model = ChatOpenAI(
-    model="gpt-4o-mini",
+    model=model_name,
     temperature=0.8,
     max_tokens=1024,
-    openai_api_key=os.getenv("OPENAI_API_KEY"),
-    system=system_prompt
+    openai_api_key=os.getenv("OPENAI_API_KEY")
 ).bind_tools(tools)
 
 # Create tool node
@@ -99,6 +102,11 @@ def should_continue(state: MessagesState) -> Literal["tools", END]:
 def call_model(state: RoastState):
     """Call the model with the current state."""
     messages = state['messages']
+    
+    # Add system message if it's not already there
+    if not any(msg.get("type") == "system" for msg in messages):
+        messages = [SystemMessage(content=system_prompt)] + messages
+    
     response = model.invoke(messages)
     return {"messages": [response]}
 
