@@ -1,0 +1,12 @@
+python-dotenv
+fastapi
+uvicorn
+langchain-core
+langchain-community>=0.0.13
+langchain-openai
+langgraph
+pydantic>=2.0.0
+beautifulsoup4
+httpx
+streamlit
+duckduckgo-search
