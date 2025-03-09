@@ -1,11 +1,7 @@
 from typing import Literal, Optional, TypedDict, Annotated
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
-from langchain_core.messages import SystemMessage
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import END, START, StateGraph, MessagesState
-from langgraph.prebuilt import ToolNode
-from langgraph.graph.message import add_messages
+from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
 import os
 from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
@@ -13,11 +9,6 @@ from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
 #https://github.com/langchain-ai/langgraph/blob/main/docs/docs/concepts/low_level.md
 # Load environment variables
 load_dotenv()
-
-# Define the state type
-class RoastState(TypedDict):
-    messages: Annotated[list, add_messages]
-    thread_id: Optional[str]
 
 # Initialize DuckDuckGo search
 search = DuckDuckGoSearchAPIWrapper(region="wt-wt", time="d", max_results=5)
@@ -39,11 +30,9 @@ def duckduckgo_search(query: str) -> str:
     except Exception as e:
         return f"Error performing search: {str(e)}"
 
-# Initialize tools
-tools = [duckduckgo_search]
-
-# System prompt
-system_prompt = """You are a comedy roast agent with a sharp wit and hilarious sense of humor. 
+# System prompts for different languages
+system_prompts = {
+    "en": """You are a comedy roast agent with a sharp wit and hilarious sense of humor. 
 Your job is to create personalized roasting questions about people.
 
 When given a name, you will:
@@ -75,120 +64,78 @@ Format your response like this:
 ---
 
 Remember: Good roasts are funny because they contain a kernel of truth, but are delivered with good humor.
+""",
+    "et": """Oled komöödia röstimise agent terava vaimukuse ja naljaka huumorimeelega.
+Sinu ülesanne on luua personaalseid röstimisküsimusi inimeste kohta.
+
+Kui sulle antakse nimi, siis sa:
+1. Otsid nende kohta infot DuckDuckGo abil
+2. Otsingutulemuste põhjal lood 5 naljakat röstimisküsimust
+3. Teed küsimused naljakaks, kuid mitte liiga õelaks või ebasobivaks
+4. Keskendud professionaalsetele saavutustele, avalikule infole või üldistele omadustele
+5. Väldid tundlikke teemasid nagu rass, religioon, puuded või tõsised isiklikud tragöödiad
+
+Sinu röstimisküsimused peaksid olema:
+- Nutikad ja vaimukad
+- Võimalusel põhinema faktilisel infol
+- Mängulised, mitte haavavad
+- Sobivad komöödiaklubi keskkonda
+
+TÄHTIS: Näita alati oma mõtteprotsessi, esmalt kokku võttes, mida sa otsingutulemuste põhjal teada said, seejärel loo röstimisküsimused selle info põhjal.
+
+Vormista oma vastus nii:
+---
+## Mida ma teada sain [Nimi] kohta
+[Võta kokku otsingutulemuste põhiinfo]
+
+## Röstimisküsimused
+1. [Esimene röstimisküsimus]
+2. [Teine röstimisküsimus]
+3. [Kolmas röstimisküsimus]
+4. [Neljas röstimisküsimus]
+5. [Viies röstimisküsimus]
+---
+
+Pea meeles: Head röstimisküsimused on naljakad, sest need sisaldavad tõetera, kuid on esitatud hea huumoriga.
 """
+}
 
-# Get model name from environment or use default
-model_name = os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini")
-
-# Initialize the model
-model = ChatOpenAI(
-    model=model_name,
-    temperature=0.8,
-    max_tokens=1024,
-    openai_api_key=os.getenv("OPENAI_API_KEY")
-).bind_tools(tools)
-
-# Create tool node
-tool_node = ToolNode(tools)
-
-def should_continue(state: MessagesState) -> Literal["tools", END]:
-    """Determine if we should continue using tools or end the conversation."""
-    messages = state['messages']
-    last_message = messages[-1]
-    if last_message.tool_calls:
-        return "tools"
-    return END
-
-def call_model(state: RoastState):
-    """Call the model with the current state."""
-    messages = state['messages']
-    
-    # Add system message if it's not already there
-    if not any(msg.get("type") == "system" for msg in messages):
-        messages = [SystemMessage(content=system_prompt)] + messages
-    
-    response = model.invoke(messages)
-    return {"messages": [response]}
-
-# Create and configure the graph
-def create_graph():
-    """Create and configure the LangGraph for the roasting agent."""
-    # Create the graph
-    workflow = StateGraph(RoastState)
-    
-    # Add nodes
-    workflow.add_node("agent", call_model)
-    workflow.add_node("tools", tool_node)
-    
-    # Add edges
-    workflow.add_edge(START, "agent")
-    workflow.add_conditional_edges(
-        "agent",
-        should_continue,
-        {
-            "tools": "tools",
-            END: END
-        }
-    )
-    workflow.add_edge("tools", "agent")
-    
-    # Initialize memory
-    checkpointer = MemorySaver()
-    
-    # Compile the graph
-    return workflow.compile(checkpointer=checkpointer)
-
-# Create the graph
-graph = create_graph()
-
-def get_response(
-    name: str,
-    thread_id: str = "roast_demo"
-) -> dict:
+def get_roast_questions(name: str, language: str = "et") -> str:
     """
-    Get a response from the roasting agent for a given name.
+    A simplified function that returns roast questions as a string.
     
     Args:
         name (str): The name of the person to roast
-        thread_id (str): Thread identifier for the conversation
-        
-    Returns:
-        dict: The final state containing the conversation
-    """
-    prompt = f"Create 5 funny roasting questions for {name}. Make sure to search for information about them first."
-    
-    initial_message = {
-        "messages": [{
-            "role": "user",
-            "content": prompt
-        }],
-        "thread_id": thread_id
-    }
-    
-    return graph.invoke(
-        initial_message,
-        config={"configurable": {"thread_id": thread_id}}
-    )
-
-def get_roast_questions(name: str) -> str:
-    """
-    A simplified function that returns just the roast questions as a string.
-    
-    Args:
-        name (str): The name of the person to roast
+        language (str): Language code ("en" or "et")
         
     Returns:
         str: The roast questions
     """
     try:
-        response = get_response(name)
+        # Get model name from environment or use default
+        model_name = os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini")
         
-        # Extract the assistant's message
-        for message in response["messages"]:
-            if message.type == "assistant":
-                return message.content
+        # Initialize the model
+        model = ChatOpenAI(
+            model=model_name,
+            temperature=0.8,
+            max_tokens=1024,
+            openai_api_key=os.getenv("OPENAI_API_KEY")
+        ).bind_tools([duckduckgo_search])
         
-        return "Sorry, I couldn't generate roast questions at this time."
+        # Select the appropriate system prompt based on language
+        system_prompt = system_prompts.get(language, system_prompts["en"])
+        
+        # Create messages
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=f"Create 5 funny roasting questions for {name}. Make sure to search for information about them first.")
+        ]
+        
+        # Get response
+        response = model.invoke(messages)
+        
+        return response.content
     except Exception as e:
         print(f"Error generating roast questions: {str(e)}")
         return f"Error generating roast questions: {str(e)}"
@@ -196,6 +143,6 @@ def get_roast_questions(name: str) -> str:
 if __name__ == "__main__":
     # Test the agent directly
     name = "Elon Musk"
-    roast_questions = get_roast_questions(name)
+    roast_questions = get_roast_questions(name, "en")
     print(f"\nRoast questions for {name}:\n")
     print(roast_questions)

@@ -1,7 +1,7 @@
 python-dotenv
 fastapi
 uvicorn
-langchain-core
+langchain
 langchain-community>=0.0.13
 langchain-openai
 langgraph
