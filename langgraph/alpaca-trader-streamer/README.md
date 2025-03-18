@@ -54,6 +54,7 @@ docker run -p 8000:8000 alpaca-agent
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
+export PYTHONPATH=$PYTHONPATH:<path-to-dir>/agentic/langgraph/alpaca-trader-streamer
 uvicorn run:app --reload
 ```
 
