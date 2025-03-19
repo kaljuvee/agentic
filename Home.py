@@ -26,6 +26,10 @@ AGENT_QUESTIONS = {
         "Show me my account information",
         "Show me my current positions",
         "Place a market order to buy 1 share of INTL"
+    ],
+    "Polymarket Agent": [
+        "Show me sports markets",
+        "Show me crypto markets"
     ]
 }
 
@@ -64,7 +68,8 @@ with st.sidebar:
     # Endpoint selector
     endpoints = {
         "CEX Aggregator": "https://cex-aggregator-agent.fly.dev",
-        "Alpaca Trader": "https://alpaca-agent.fly.dev"
+        "Alpaca Trader": "https://alpaca-agent.fly.dev",
+        "Polymarket Agent": "https://zuvu-polymarket.dev/api"
     }
     
     selected_endpoint = st.radio(
