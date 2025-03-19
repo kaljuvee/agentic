@@ -48,7 +48,7 @@ AGENT_QUESTIONS = {
     "CEX Aggregator": [
         "What exchanges are available?",
         "Show me my balance on Bitstamp",
-        "What is the price of BTC/USDT on Binance?"
+        "What is the price of BTC/USDC on Binance?"
     ],
     "Alpaca Trader": [
         "Show me my account information",
