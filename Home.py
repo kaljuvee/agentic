@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 # Configure the page
 st.set_page_config(
-    page_title="Zuvu AI Agents API Tester",
+    page_title="AI Agents Test UI",
     page_icon="🤖",
     layout="wide"
 )
@@ -13,7 +13,25 @@ st.set_page_config(
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "selected_endpoint" not in st.session_state:
-    st.session_state.selected_endpoint = "Production"
+    st.session_state.selected_endpoint = "CEX Aggregator"
+
+# Define predefined questions for each agent
+AGENT_QUESTIONS = {
+    "CEX Aggregator": [
+        "What exchanges are available?",
+        "Show me my balance on Bitstamp",
+        "What is the price of BTC/USDT on Binance?"
+    ],
+    "Alpaca Trader": [
+        "Show me my account information",
+        "Show me my current positions",
+        "Place a market order to buy 1 share of INTL"
+    ],
+    "Polymarket Agent": [
+        "Show me sports markets",
+        "Show me crypto markets"
+    ]
+}
 
 def normalize_agent_name(agent_name: str) -> str:
     """
@@ -25,12 +43,14 @@ def send_message(message: str, endpoint_url: str) -> Dict[Any, Any]:
     """
     Send message to the selected API endpoint
     """
-    # Normalize the agent name before sending
-    normalized_agent = normalize_agent_name(st.session_state.agent_selector)
-    
+    # Prepare the request payload matching ChatRequest schema
     payload = {
-        "query": message,
-        "agent": normalized_agent
+        "input": message,
+        "history": [],
+        "config": {
+            "streaming": False,
+            "thread_id": "test_thread"
+        }
     }
     
     try:
@@ -47,28 +67,13 @@ with st.sidebar:
     
     # Endpoint selector
     endpoints = {
-        "Production": "https://agentic-dcjz.onrender.com",
-        "Local": "http://localhost:5000"
+        "CEX Aggregator": "https://cex-aggregator-agent.fly.dev",
+        "Alpaca Trader": "https://alpaca-agent.fly.dev",
+        "Polymarket Agent": "https://zuvu-polymarket.dev/api"
     }
     
-    # Add agent selector
-    agents = [
-        "Anchorman",
-        "Sevro",
-        "Sous-Chef",
-        "BonVoyage",
-        "JRR Token",
-        "ChessBuddy",
-    ]
-    
-    selected_agent = st.selectbox(
-        "Select Agent",
-        options=agents,
-        key="agent_selector"
-    )
-    
     selected_endpoint = st.radio(
-        "Select API Endpoint",
+        "Select Agent",
         options=list(endpoints.keys()),
         key="endpoint_selector"
     )
@@ -76,16 +81,44 @@ with st.sidebar:
     # Display current endpoint URL
     st.code(endpoints[selected_endpoint], language="text")
     
-    # Add some information about the agents
-    st.markdown("---")
-    st.markdown("### About")
-    st.markdown("""
-    Learn more about the available agents and their capabilities in the 
-    [Agent Catalogue Documentation](https://github.com/ZuvuFoundation/agent-catalogue/blob/main/documentation/agent_ideas.md)
-    """)
+    # Display predefined questions for the selected agent
+    if selected_endpoint in AGENT_QUESTIONS:
+        st.markdown("---")
+        st.markdown("### Example Questions")
+        for question in AGENT_QUESTIONS[selected_endpoint]:
+            if st.button(question):
+                # Add user message to chat history
+                st.session_state.messages.append({"role": "user", "content": question})
+                
+                # Display user message
+                with st.chat_message("user"):
+                    st.markdown(question)
+                
+                # Show thinking message and get response
+                with st.chat_message("assistant"):
+                    message_placeholder = st.empty()
+                    message_placeholder.markdown("🤔 Thinking...")
+                    
+                    try:
+                        # Send message to API
+                        response = send_message(question, endpoints[selected_endpoint])
+                        
+                        # Update chat history with response
+                        if response and "response" in response:
+                            message_placeholder.markdown(response["response"])
+                            st.session_state.messages.append(
+                                {"role": "assistant", "content": response["response"]}
+                            )
+                        else:
+                            message_placeholder.markdown("❌ Error: Invalid response from server")
+                            
+                    except Exception as e:
+                        message_placeholder.markdown(f"❌ Error: {str(e)}")
+                
+                st.rerun()
 
 # Main chat interface
-st.title("🤖 Zuvu AI Agents API Tester")
+st.title("🤖 AI Agents API Tester")
 
 # Display chat messages
 for message in st.session_state.messages:
