@@ -1,2 +1,7 @@
 streamlit
 requests
+streamlit-webrtc
+openai
+av
+numpy
+python-dotenv

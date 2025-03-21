@@ -1,6 +1,12 @@
 import streamlit as st
 import requests
 from typing import Dict, Any
+from utils.stt_util import setup_stt
+import os
+from dotenv import load_dotenv
+
+# Load environment variables right after imports
+load_dotenv()
 
 # Initialize session state variables
 if "messages" not in st.session_state:
@@ -181,8 +187,14 @@ if st.session_state.logged_in:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Chat input
-    if prompt := st.chat_input("What would you like to know?"):
+    # Add speech-to-text input
+    spoken_text = setup_stt()
+    if spoken_text:
+        prompt = spoken_text
+    else:
+        prompt = st.chat_input("What would you like to know?")
+
+    if prompt:
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
         
