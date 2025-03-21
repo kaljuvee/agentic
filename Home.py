@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 from typing import Dict, Any
-from utils.stt_util import setup_stt
 import os
 from dotenv import load_dotenv
 
@@ -116,6 +115,21 @@ if st.session_state.logged_in:
     with st.sidebar:
         st.title("⚙️ Configuration")
         
+        # Add instructions
+        st.markdown("### 📝 How to Use")
+        st.markdown("""
+        1. **Select an Agent** below to interact with
+        2. Type your message in the chat input
+        3. Try the **Example Questions** below for quick testing
+        """)
+        
+        st.markdown("---")
+
+        # Voice toggle (placeholder for future implementation)
+        st.toggle("🎤 Enable Voice Input (Coming Soon)", value=False, disabled=True)
+        
+        st.markdown("---")
+        
         # Endpoint selector
         endpoints = {
             "CEX Aggregator": "https://cex-aggregator-agent.fly.dev",
@@ -187,14 +201,8 @@ if st.session_state.logged_in:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Add speech-to-text input
-    spoken_text = setup_stt()
-    if spoken_text:
-        prompt = spoken_text
-    else:
-        prompt = st.chat_input("What would you like to know?")
-
-    if prompt:
+    # Chat input
+    if prompt := st.chat_input("What would you like to know?"):
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
         
