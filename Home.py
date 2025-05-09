@@ -13,7 +13,7 @@ load_dotenv()
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "selected_endpoint" not in st.session_state:
-    st.session_state.selected_endpoint = "CEX Aggregator"
+    st.session_state.selected_endpoint = "Alpaca Trader"
 
 # Configure the page
 st.set_page_config(
@@ -134,8 +134,8 @@ with st.sidebar:
     
     # Endpoint selector
     endpoints = {
-        "CEX Aggregator": "https://cex-aggregator-agent.fly.dev",
         "Alpaca Trader": "https://alpaca-agent.fly.dev",
+        "CEX Aggregator": "https://cex-aggregator-agent.fly.dev",
         "Polymarket Agent": "https://zuvu-polymarket.dev/api",
         "NewsX": "https://x-posting-agent.fly.dev"
     }
@@ -143,8 +143,10 @@ with st.sidebar:
     selected_endpoint = st.radio(
         "Select Agent",
         options=list(endpoints.keys()),
-        key="endpoint_selector"
+        key="endpoint_selector",
+        on_change=lambda: st.rerun()
     )
+    st.session_state.selected_endpoint = selected_endpoint
     
     # Display current endpoint URL
     st.code(endpoints[selected_endpoint], language="text")
@@ -158,36 +160,6 @@ with st.sidebar:
     )
     is_streaming = streaming_mode == "Streaming"
     st.session_state.streaming_mode = is_streaming
-    
-    # Display predefined questions for the selected agent
-    if selected_endpoint in AGENT_QUESTIONS:
-        st.markdown("---")
-        st.markdown("### Example Questions")
-        for question in AGENT_QUESTIONS[selected_endpoint]:
-            if st.button(question):
-                st.session_state.messages.append({"role": "user", "content": question})
-                with st.chat_message("user"):
-                    st.markdown(question)
-                with st.chat_message("assistant"):
-                    message_placeholder = st.empty()
-                    message_placeholder.markdown("🤔 Thinking...")
-                    try:
-                        response = send_message(
-                            question,
-                            endpoints[selected_endpoint],
-                            streaming=st.session_state.get("streaming_mode", True)
-                        )
-                        if response and "response" in response:
-                            formatted_response = format_positions_markdown(response["response"])
-                            message_placeholder.markdown(formatted_response)
-                            st.session_state.messages.append(
-                                {"role": "assistant", "content": response["response"]}
-                            )
-                        else:
-                            message_placeholder.markdown("❌ Error: Invalid response from server")
-                    except Exception as e:
-                        message_placeholder.markdown(f"❌ Error: {str(e)}")
-                st.rerun()
     
     # Add a clear button
     if st.button("Clear Chat"):
@@ -232,3 +204,79 @@ if prompt := st.chat_input("What would you like to know?"):
                 message_placeholder.markdown("❌ Error: Invalid response from server")
         except Exception as e:
             message_placeholder.markdown(f"❌ Error: {str(e)}")
+
+# In the main chat interface, after the chat input, dynamically display example questions based on the selected agent
+st.markdown("### Example Questions")
+selected_endpoint = st.session_state.selected_endpoint
+if selected_endpoint == "Alpaca Trader":
+    example_questions = [
+        "What can you help me with?",
+        "What are you best at?",
+        "Show me my account information",
+        "Show me my current positions",
+        "Place a market order to buy 1 share of INTL",
+        "Place a limit order to buy 1 share of AAPL at $150"
+    ]
+elif selected_endpoint == "CEX Aggregator":
+    example_questions = [
+        "What exchanges are available?",
+        "Show me my balance on Bitstamp",
+        "What is the price of BTC/USDC on Binance?",
+        "Show me my balance on Binance",
+        "What is the price of ETH/USDT on Bitstamp?",
+        "Show me my balance on Coinbase"
+    ]
+else:
+    example_questions = []
+
+# Create 2 rows of 3 buttons each
+col1, col2, col3 = st.columns(3)
+for i, question in enumerate(example_questions):
+    if i < 3:
+        if col1.button(question, key=f"button_{question}"):
+            st.session_state.messages.append({"role": "user", "content": question})
+            with st.chat_message("user"):
+                st.markdown(question)
+            with st.chat_message("assistant"):
+                message_placeholder = st.empty()
+                message_placeholder.markdown("🤔 Thinking...")
+                try:
+                    response = send_message(
+                        question,
+                        endpoints[selected_endpoint],
+                        streaming=st.session_state.get("streaming_mode", True)
+                    )
+                    if response and "response" in response:
+                        formatted_response = format_positions_markdown(response["response"])
+                        message_placeholder.markdown(formatted_response)
+                        st.session_state.messages.append(
+                            {"role": "assistant", "content": response["response"]}
+                        )
+                    else:
+                        message_placeholder.markdown("❌ Error: Invalid response from server")
+                except Exception as e:
+                    message_placeholder.markdown(f"❌ Error: {str(e)}")
+    elif i < 6:
+        if col2.button(question, key=f"button_{question}"):
+            st.session_state.messages.append({"role": "user", "content": question})
+            with st.chat_message("user"):
+                st.markdown(question)
+            with st.chat_message("assistant"):
+                message_placeholder = st.empty()
+                message_placeholder.markdown("🤔 Thinking...")
+                try:
+                    response = send_message(
+                        question,
+                        endpoints[selected_endpoint],
+                        streaming=st.session_state.get("streaming_mode", True)
+                    )
+                    if response and "response" in response:
+                        formatted_response = format_positions_markdown(response["response"])
+                        message_placeholder.markdown(formatted_response)
+                        st.session_state.messages.append(
+                            {"role": "assistant", "content": response["response"]}
+                        )
+                    else:
+                        message_placeholder.markdown("❌ Error: Invalid response from server")
+                except Exception as e:
+                    message_placeholder.markdown(f"❌ Error: {str(e)}")
