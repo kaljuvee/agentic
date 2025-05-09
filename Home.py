@@ -15,6 +15,9 @@ if "messages" not in st.session_state:
 if "selected_endpoint" not in st.session_state:
     st.session_state.selected_endpoint = "Alpaca Trader"
 
+# Global configuration
+STREAMING_ENABLED = False
+
 # Configure the page
 st.set_page_config(
     page_title="Agentic AI Demo",
@@ -51,21 +54,7 @@ def normalize_agent_name(agent_name: str) -> str:
     """
     return agent_name.lower().replace(" ", "-")
 
-def format_positions_markdown(text: str) -> str:
-    """
-    Clean up and format markdown for position responses to ensure proper rendering in Streamlit.
-    """
-    # Replace '---' with horizontal rules and double newlines
-    text = text.replace('---', '\n\n---\n\n')
-    # Ensure headings have double newlines before and after
-    text = text.replace('###', '\n\n###')
-    # Remove stray asterisks not part of markdown
-    text = re.sub(r'(?<!\*)\*(?!\*)', '', text)
-    # Remove excessive whitespace
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    return text.strip()
-
-def send_message(message: str, endpoint_url: str, streaming: bool = True) -> Dict[Any, Any]:
+def send_message(message: str, endpoint_url: str, streaming: bool = STREAMING_ENABLED) -> Dict[Any, Any]:
     """
     Send message to the selected API endpoint
     """
@@ -80,15 +69,16 @@ def send_message(message: str, endpoint_url: str, streaming: bool = True) -> Dic
     try:
         response = requests.post(endpoint_url + "/chat", json=payload, stream=streaming)
         response.raise_for_status()
-        full_response = ""
         if streaming:
+            full_response = ""
             for line in response.iter_lines():
                 if line:
                     try:
                         line_str = line.decode('utf-8')
                         if line_str.startswith('data: '):
                             content = line_str[6:]
-                            full_response += content
+                            if content.strip():
+                                full_response += content
                     except Exception as e:
                         st.error(f"Error processing response: {str(e)}")
                         continue
@@ -156,11 +146,10 @@ if prompt := st.chat_input("What would you like to know?"):
             response = send_message(
                 prompt,
                 endpoints[selected_endpoint],
-                streaming=st.session_state.get("streaming_mode", True)
+                streaming=STREAMING_ENABLED
             )
             if response and "response" in response:
-                formatted_response = format_positions_markdown(response["response"])
-                message_placeholder.markdown(formatted_response)
+                message_placeholder.markdown(response["response"])
                 st.session_state.messages.append(
                     {"role": "assistant", "content": response["response"]}
                 )
@@ -208,11 +197,10 @@ for i, question in enumerate(example_questions):
                     response = send_message(
                         question,
                         endpoints[selected_endpoint],
-                        streaming=st.session_state.get("streaming_mode", True)
+                        streaming=STREAMING_ENABLED
                     )
                     if response and "response" in response:
-                        formatted_response = format_positions_markdown(response["response"])
-                        message_placeholder.markdown(formatted_response)
+                        message_placeholder.markdown(response["response"])
                         st.session_state.messages.append(
                             {"role": "assistant", "content": response["response"]}
                         )
@@ -232,11 +220,10 @@ for i, question in enumerate(example_questions):
                     response = send_message(
                         question,
                         endpoints[selected_endpoint],
-                        streaming=st.session_state.get("streaming_mode", True)
+                        streaming=STREAMING_ENABLED
                     )
                     if response and "response" in response:
-                        formatted_response = format_positions_markdown(response["response"])
-                        message_placeholder.markdown(formatted_response)
+                        message_placeholder.markdown(response["response"])
                         st.session_state.messages.append(
                             {"role": "assistant", "content": response["response"]}
                         )
