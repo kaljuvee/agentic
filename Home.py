@@ -17,7 +17,7 @@ if "selected_endpoint" not in st.session_state:
 
 # Configure the page
 st.set_page_config(
-    page_title="AI Agents Test UI",
+    page_title="Agentic AI Demo",
     page_icon="🤖",
     layout="wide"
 )
@@ -115,24 +115,7 @@ st.markdown(
 
 # Sidebar for configuration
 with st.sidebar:
-    st.title("⚙️ Configuration")
-    
-    # Add instructions
-    st.markdown("### 📝 How to Use")
-    st.markdown("""
-    1. **Select an Agent** below to interact with
-    2. Type your message in the chat input
-    3. Try the **Example Questions** below for quick testing
-    """)
-    
-    st.markdown("---")
-
-    # Voice toggle (placeholder for future implementation)
-    st.toggle("🎤 Enable Voice Input (Coming Soon)", value=False, disabled=True)
-    
-    st.markdown("---")
-    
-    # Endpoint selector
+    # Keep the agent selection and endpoint URL display
     endpoints = {
         "Alpaca Trader": "https://alpaca-agent.fly.dev",
         "CEX Aggregator": "https://cex-aggregator-agent.fly.dev",
@@ -143,37 +126,18 @@ with st.sidebar:
     selected_endpoint = st.radio(
         "Select Agent",
         options=list(endpoints.keys()),
-        key="endpoint_selector",
-        on_change=lambda: st.rerun()
+        key="endpoint_selector"
     )
     st.session_state.selected_endpoint = selected_endpoint
-    
-    # Display current endpoint URL
     st.code(endpoints[selected_endpoint], language="text")
     
-    # Add streaming/non-streaming toggle, default to Non-Streaming
-    streaming_mode = st.radio(
-        "Response Mode",
-        options=["Streaming", "Non-Streaming"],
-        key="streaming_mode_selector",
-        index=1  # Default to Non-Streaming
-    )
-    is_streaming = streaming_mode == "Streaming"
-    st.session_state.streaming_mode = is_streaming
-    
-    # Add a clear button
-    if st.button("Clear Chat"):
+    # Add a divider and refresh button
+    st.markdown("---")
+    if st.button("🔄 Refresh Chat", use_container_width=True):
         st.session_state.messages = []
-        st.rerun()
-    
-    # Add a refresh button to restart the session
-    if st.button("Refresh"):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.rerun()
 
 # Main chat interface
-st.title("🤖 AI Agents API Tester")
+st.title(f"🤖 {selected_endpoint}")
 
 # Display chat messages
 for message in st.session_state.messages:
@@ -211,7 +175,7 @@ selected_endpoint = st.session_state.selected_endpoint
 if selected_endpoint == "Alpaca Trader":
     example_questions = [
         "What can you help me with?",
-        "What are you best at?",
+        "Back test trend following for TSLA last week",
         "Show me my account information",
         "Show me my current positions",
         "Place a market order to buy 1 share of INTL",
@@ -220,11 +184,11 @@ if selected_endpoint == "Alpaca Trader":
 elif selected_endpoint == "CEX Aggregator":
     example_questions = [
         "What exchanges are available?",
-        "Show me my balance on Bitstamp",
-        "What is the price of BTC/USDC on Binance?",
         "Show me my balance on Binance",
-        "What is the price of ETH/USDT on Bitstamp?",
-        "Show me my balance on Coinbase"
+        "What is the price of BTC/USDC on Bybit?",
+        "Show me arbitrage opportunities for BTC/USDC between Binance and Bybit",
+        "Run a mean reversion backtest for BTC/USDT on Binance with a 1 week lookback and 1.5% threshold",
+        "Run a trend following backtest for ETH/USDT on Bybit with 50-day MA and RSI(14) with overbought at 75 and oversold at 25"
     ]
 else:
     example_questions = []
