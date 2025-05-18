@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+pydantic
+openai
+openai-agents
+pandas
+requests
+python-dotenv
+py-clob-client
+starlette
+anyio
+py-order-utils

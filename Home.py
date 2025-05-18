@@ -25,29 +25,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Define predefined questions for each agent
-AGENT_QUESTIONS = {
-    "CEX Aggregator": [
-        "What exchanges are available?",
-        "Show me my balance on Bitstamp",
-        "What is the price of BTC/USDC on Binance?"
-    ],
-    "Alpaca Trader": [
-        "Show me my account information",
-        "Show me my current positions",
-        "Place a market order to buy 1 share of INTL"
-    ],
-    "Polymarket Agent": [
-        "Show me sports markets",
-        "Show me crypto markets"
-    ],
-    "NewsX": [
-        "Comment on news on China",
-        "Comment on news on the Ukraine war",
-        "Comment on news on US stock market"
-    ]
-}
-
 def normalize_agent_name(agent_name: str) -> str:
     """
     Normalize agent name to lowercase and replace spaces with hyphens
@@ -109,7 +86,7 @@ with st.sidebar:
     endpoints = {
         "Alpaca Trader": "https://alpaca-agent.fly.dev",
         "CEX Aggregator": "https://cex-aggregator-agent.fly.dev",
-        "Polymarket Agent": "https://zuvu-polymarket.dev/api",
+        "Polymarket Agent": "https://zuvu-polymarket-agent.fly.dev/chat",
         "NewsX": "https://x-posting-agent.fly.dev"
     }
     
@@ -178,6 +155,14 @@ elif selected_endpoint == "CEX Aggregator":
         "Show me arbitrage opportunities for BTC/USDC between Binance and Bybit",
         "Run a mean reversion backtest for BTC/USDT on Binance with a 1 week lookback and 1.5% threshold",
         "Run a trend following backtest for ETH/USDT on Bybit with 50-day MA and RSI(14) with overbought at 75 and oversold at 25"
+    ]
+elif selected_endpoint == "Polymarket Agent":
+    example_questions = [
+        "What can you help me with?",
+        "What markets are available on Polymarket right now?",
+        "Tell me about upcoming election markets",
+        "Show me market with most volume and liquidity",
+        "Show me the markets ending today"
     ]
 else:
     example_questions = []

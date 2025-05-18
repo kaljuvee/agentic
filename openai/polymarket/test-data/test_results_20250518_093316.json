@@ -1,0 +1,47 @@
+{
+  "timestamp": "2025-05-18T09:33:04.795546",
+  "tests": [
+    {
+      "name": "get_active_markets",
+      "success": true,
+      "result": "Error getting active and open markets: 'category'",
+      "error": null,
+      "timestamp": "2025-05-18T09:33:04.992838"
+    },
+    {
+      "name": "get_markets_with_keywords",
+      "success": true,
+      "result": "Found 100 active and open markets in total.\nFiltered by keywords: election, bitcoin\n\n### Markets with 'election' (8 markets)\n  1. Will C\u0103lin Georgescu win the Romanian Presidential election by  5-10%? (Market ID: 514674, Volume: 169811.454883, Liquidity: 18759.9571, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  2. Will C\u0103lin Georgescu win the Romanian Presidential election by 0-5%? (Market ID: 514814, Volume: 119677.687572, Liquidity: 11195.63646, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  3. Will Elena Lasconi win the Romanian Presidential election by 0-5%? (Market ID: 514817, Volume: 90079.044389, Liquidity: 10840.6333, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  4. Will Elena Lasconi win the Romanian Presidential election by 5-10%? (Market ID: 514818, Volume: 72692.764596, Liquidity: 9682.7185, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  5. Will Elena Lasconi win the Romanian Presidential election by 10% or more? (Market ID: 514819, Volume: 308167.659364, Liquidity: 9109.49858, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  6. Will C\u0103lin Georgescu win the Romanian Presidential election by 10% or more? (Market ID: 514820, Volume: 253495.722768, Liquidity: 6800.26953, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  7. Will another individual win the Romanian Presidential election? (Market ID: 514953, Volume: 167356.259136, Liquidity: 7751.45008, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  8. Will Syria hold national elections before July? (Market ID: 515398, Volume: 114356.75937, Liquidity: 9381.244, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n\n### Markets with 'bitcoin' (1 markets)\n  1. Will Bitcoin replace SHA-256 before June? (Market ID: 515653, Volume: 259780.134456, Liquidity: 12446.39643, Category: Uncategorized, Start Date: N/A, End Date: N/A)",
+      "error": null,
+      "timestamp": "2025-05-18T09:33:05.313791"
+    },
+    {
+      "name": "get_market_summary",
+      "success": true,
+      "result": "=== Market Summary ===\nTotal markets: 500",
+      "error": null,
+      "timestamp": "2025-05-18T09:33:05.704162"
+    },
+    {
+      "name": "agent_creation",
+      "success": true,
+      "result": "Agent created successfully",
+      "error": null,
+      "timestamp": "2025-05-18T09:33:05.860166"
+    },
+    {
+      "name": "agent_basic_query",
+      "success": true,
+      "result": "It seems there was an error retrieving the most active open markets, but I can tell you that there are currently a total of 500 markets available on Polymarket. If you'd like, I can try again to find the most active ones or narrow down the search by specific keywords. Let me know how you'd like to proceed!",
+      "error": null,
+      "timestamp": "2025-05-18T09:33:11.224224"
+    },
+    {
+      "name": "agent_capabilities_query",
+      "success": true,
+      "result": "I can assist you with a variety of tasks related to prediction markets on Polymarket.com. Here\u2019s how I can help:\n\n1. **Exploring Markets:**\n   - Discover active and open markets.\n   - Search for markets using specific keywords (like \"election\" or \"bitcoin\").\n   - Provide summaries of market categories and upcoming markets.\n\n2. **Market Analysis:**\n   - Give detailed information about specific markets, including current prices and trading volumes.\n   - Help you understand market probabilities and their implications.\n   - Track changes and movements in market data.\n\n3. **Market Understanding:**\n   - Explain how prediction markets work, including market mechanics and terminology.\n   - Help interpret market prices as probabilities.\n   - Offer insights into different market categories and types.\n\nFor example, if you're interested in the likelihood of a particular event, I can help you find relevant markets and analyze the probabilities associated with different outcomes. Whether you're a beginner or experienced user, I can tailor my assistance to your needs!",
+      "error": null,
+      "timestamp": "2025-05-18T09:33:16.455349"
+    }
+  ]
+}

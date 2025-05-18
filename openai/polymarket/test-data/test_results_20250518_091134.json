@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-05-18T09:11:21.974087",
+  "tests": [
+    {
+      "name": "get_active_markets",
+      "success": true,
+      "result": "Error getting active and open markets: 'category'",
+      "error": null,
+      "timestamp": "2025-05-18T09:11:22.972682"
+    },
+    {
+      "name": "get_markets_with_keywords",
+      "success": true,
+      "result": "Found 100 active and open markets in total.\nFiltered by keywords: election, bitcoin\n\n### Markets with 'election' (8 markets)\n  1. Will C\u0103lin Georgescu win the Romanian Presidential election by  5-10%? (Market ID: 514674, Volume: 169811.454883, Liquidity: 17564.6251, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  2. Will C\u0103lin Georgescu win the Romanian Presidential election by 0-5%? (Market ID: 514814, Volume: 119677.687572, Liquidity: 9990.40946, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  3. Will Elena Lasconi win the Romanian Presidential election by 0-5%? (Market ID: 514817, Volume: 90079.044389, Liquidity: 9635.4563, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  4. Will Elena Lasconi win the Romanian Presidential election by 5-10%? (Market ID: 514818, Volume: 72692.764596, Liquidity: 8487.3115, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  5. Will Elena Lasconi win the Romanian Presidential election by 10% or more? (Market ID: 514819, Volume: 308167.659364, Liquidity: 7903.72981, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  6. Will C\u0103lin Georgescu win the Romanian Presidential election by 10% or more? (Market ID: 514820, Volume: 253495.722768, Liquidity: 6778.03023, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  7. Will another individual win the Romanian Presidential election? (Market ID: 514953, Volume: 167356.259136, Liquidity: 7741.69023, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n  8. Will Syria hold national elections before July? (Market ID: 515398, Volume: 114356.75937, Liquidity: 9572.72779, Category: Uncategorized, Start Date: N/A, End Date: N/A)\n\n### Markets with 'bitcoin' (1 markets)\n  1. Will Bitcoin replace SHA-256 before June? (Market ID: 515653, Volume: 259780.134456, Liquidity: 12583.07543, Category: Uncategorized, Start Date: N/A, End Date: N/A)",
+      "error": null,
+      "timestamp": "2025-05-18T09:11:23.255599"
+    },
+    {
+      "name": "get_market_summary",
+      "success": true,
+      "result": "=== Market Summary ===\nTotal markets: 500",
+      "error": null,
+      "timestamp": "2025-05-18T09:11:23.816351"
+    },
+    {
+      "name": "agent_creation",
+      "success": true,
+      "result": "Agent created successfully",
+      "error": null,
+      "timestamp": "2025-05-18T09:11:23.959510"
+    },
+    {
+      "name": "agent_basic_query",
+      "success": true,
+      "result": "There are currently 500 active markets on Polymarket. Would you like to explore specific topics or keywords to find the most active and relevant markets for you?",
+      "error": null,
+      "timestamp": "2025-05-18T09:11:34.796239"
+    }
+  ]
+}
