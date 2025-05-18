@@ -86,7 +86,7 @@ with st.sidebar:
     endpoints = {
         "Alpaca Trader": "https://alpaca-agent.fly.dev",
         "CEX Aggregator": "https://cex-aggregator-agent.fly.dev",
-        "Polymarket Agent": "https://zuvu-polymarket-agent.fly.dev/chat",
+        "Polymarket Agent": "https://zuvu-polymarket-agent.fly.dev",
         "NewsX": "https://x-posting-agent.fly.dev"
     }
     
