@@ -18,6 +18,14 @@ if "selected_endpoint" not in st.session_state:
 # Global configuration
 STREAMING_ENABLED = False
 
+# Agent configurations
+AGENT_CONFIGS = {
+    "Alpaca Trader": {"streaming": False},
+    "CEX Aggregator": {"streaming": False},
+    "Polymarket Agent": {"streaming": True},
+    "NewsX": {"streaming": False}
+}
+
 # Configure the page
 st.set_page_config(
     page_title="Agentic AI Demo",
@@ -31,21 +39,31 @@ def normalize_agent_name(agent_name: str) -> str:
     """
     return agent_name.lower().replace(" ", "-")
 
-def send_message(message: str, endpoint_url: str, streaming: bool = STREAMING_ENABLED) -> Dict[Any, Any]:
+def send_message(message: str, endpoint_url: str, selected_endpoint: str) -> Dict[Any, Any]:
     """
     Send message to the selected API endpoint
     """
-    payload = {
-        "input": message,
-        "history": [],
-        "config": {
-            "streaming": streaming,
-            "thread_id": "test_thread"
+    streaming = AGENT_CONFIGS[selected_endpoint]["streaming"]
+    
+    # Use different payload structures based on the agent
+    if selected_endpoint == "Polymarket Agent":
+        payload = {
+            "input": message
         }
-    }
+    else:
+        payload = {
+            "input": message,
+            "history": [],
+            "config": {
+                "streaming": streaming,
+                "thread_id": "test_thread"
+            }
+        }
+    
     try:
         response = requests.post(endpoint_url + "/chat", json=payload, stream=streaming)
         response.raise_for_status()
+        
         if streaming:
             full_response = ""
             for line in response.iter_lines():
@@ -59,12 +77,15 @@ def send_message(message: str, endpoint_url: str, streaming: bool = STREAMING_EN
                     except Exception as e:
                         st.error(f"Error processing response: {str(e)}")
                         continue
+            
             if not full_response:
                 st.error("No response received from the server")
                 return {"response": "Error: No response received from the server"}
+                
             return {"response": full_response}
         else:
             return response.json()
+            
     except requests.exceptions.RequestException as e:
         st.error(f"Error communicating with the API: {str(e)}")
         return {"response": "Error: Failed to get response from the server"}
@@ -123,7 +144,7 @@ if prompt := st.chat_input("What would you like to know?"):
             response = send_message(
                 prompt,
                 endpoints[selected_endpoint],
-                streaming=STREAMING_ENABLED
+                selected_endpoint
             )
             if response and "response" in response:
                 message_placeholder.markdown(response["response"])
@@ -182,7 +203,7 @@ for i, question in enumerate(example_questions):
                     response = send_message(
                         question,
                         endpoints[selected_endpoint],
-                        streaming=STREAMING_ENABLED
+                        selected_endpoint
                     )
                     if response and "response" in response:
                         message_placeholder.markdown(response["response"])
@@ -205,7 +226,7 @@ for i, question in enumerate(example_questions):
                     response = send_message(
                         question,
                         endpoints[selected_endpoint],
-                        streaming=STREAMING_ENABLED
+                        selected_endpoint
                     )
                     if response and "response" in response:
                         message_placeholder.markdown(response["response"])
