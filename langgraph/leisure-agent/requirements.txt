@@ -1,0 +1,13 @@
+python-dotenv
+fastapi
+uvicorn
+langchain-core
+langchain-openai
+langchain-community
+langgraph
+pydantic
+beautifulsoup4
+pytest
+pytest-asyncio
+httpx
+requests
